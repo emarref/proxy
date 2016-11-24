@@ -3,9 +3,11 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
 )
 
 var publicPort = flag.String("public-port", "9999", "Public port on which to serve proxied content")
@@ -15,20 +17,28 @@ var scheme = flag.String("scheme", "http", "Use http or https locally")
 var insecure = flag.Bool("insecure", false, "If your local server uses a self-signed cert, set this to true")
 
 func main() {
+	log := log.New(os.Stdout, "[proxy]\t", log.LstdFlags)
+
 	flag.Parse()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method + " " + r.URL.EscapedPath())
+
 		director := func(req *http.Request) {
 			req.URL.Scheme = *scheme
 			req.URL.Host = "127.0.0.1:" + *internalPort
 			req.Host = *hostname
 		}
+
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},
 		}
+
 		proxy := &httputil.ReverseProxy{Director: director, Transport: tr}
 		proxy.ServeHTTP(w, r)
 	})
 
+	fmt.Println("Listening for external requests on port " + *publicPort)
+	fmt.Println("Forwarding traffic to " + *scheme + "://" + *hostname + "/ on port " + *internalPort)
 	log.Fatal(http.ListenAndServe(":"+*publicPort, nil))
 }
