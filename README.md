@@ -30,3 +30,11 @@ Usage of ./proxy:
    `ssh -R 9998:localhost:443 myuser@myserver proxy -hostname mylocalsite.dev -insecure -scheme https`
 
 The above command will expose the port 9999 on the server, and proxy it it through to your local machine, configuring the Host header and requesting https. Which means a request to http://myserver:9999 will return your local server as if you'd requested https://mylocalsite.dev
+
+## Build
+
+With docker:
+
+```
+docker run --rm -v "$PWD":/usr/src/proxy -w /usr/src/proxy golang:latest go build -v
+```
