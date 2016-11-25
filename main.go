@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method + " " + r.URL.EscapedPath())
+		log.Println("[" + r.RemoteAddr + "]\t" + r.Method + " " + r.URL.EscapedPath())
 
 		director := func(req *http.Request) {
 			req.URL.Scheme = *scheme
